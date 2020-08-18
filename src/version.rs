@@ -177,16 +177,23 @@ impl fmt::Display for Version {
 
 impl PartialEq for Version {
     fn eq(&self, other: &Version) -> bool {
-        self.partial_cmp(other).unwrap() == Ordering::Equal
+        self.cmp(other) == Ordering::Equal
+    }
+}
+
+impl Eq for Version {}
+
+impl Ord for Version {
+    fn cmp(&self, other: &Version) -> Ordering {
+        match self.compare_main(other) {
+            Ordering::Equal => self.compare_pre(other),
+            x => x,
+        }
     }
 }
 
 impl PartialOrd for Version {
     fn partial_cmp(&self, other: &Version) -> Option<Ordering> {
-        let res = self.compare_main(other);
-        Some(match res {
-            Ordering::Equal => self.compare_pre(other),
-            _ => res,
-        })
+        Some(self.cmp(other))
     }
 }
